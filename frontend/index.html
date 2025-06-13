@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skynet Chat Interface</title>
@@ -246,8 +246,8 @@
             display: block;
         }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="scan-line"></div>
     <div class="api-key-container">
         <input type="password" id="apiKeyInput" placeholder="Enter your OpenAI API key">
@@ -337,8 +337,12 @@
             typingIndicator.style.display = 'block';
 
             try {
-                // Use the FastAPI backend URL
-                const response = await fetch('http://localhost:8000/api/chat', {
+                // Use the deployed API URL
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:8000/api/chat'
+                    : 'https://the-ai-engineer-challenge-neon.vercel.app/api/chat';
+                
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -388,5 +392,5 @@
         // Add initial system message
         addMessage('SKYNET CHAT SYSTEM INITIALIZED. Please enter your OpenAI API key to begin.', false);
     </script>
-</body>
-</html> 
+  </body>
+</html>
