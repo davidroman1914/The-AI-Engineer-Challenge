@@ -3,6 +3,7 @@
      height="auto"/>
 </p>
 
+## Testing Git
 
 ## <h1 align="center" id="heading"> 👋 Welcome to the AI Engineer Challenge</h1>
 
