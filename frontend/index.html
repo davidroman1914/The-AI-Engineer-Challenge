@@ -3,189 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat Interface</title>
+    <title>Skynet Chat Interface</title>
     <style>
+        :root {
+            --primary-color: #00ff00;
+            --secondary-color: #003300;
+            --background-color: #000000;
+            --text-color: #00ff00;
+            --glow-color: rgba(0, 255, 0, 0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Courier New', monospace;
         }
 
         body {
-            background-color: #f5f5f5;
+            background-color: var(--background-color);
+            color: var(--text-color);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 48%, var(--glow-color) 49%, var(--glow-color) 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, var(--glow-color) 49%, var(--glow-color) 51%, transparent 52%);
+            background-size: 30px 30px;
+            opacity: 0.1;
+            pointer-events: none;
         }
 
         .container {
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            flex: 1;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            box-shadow: 0 0 20px var(--glow-color);
+            padding: 20px;
+            margin-top: 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--glow-color);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
 
         .chat-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
-        .input-group {
-            margin-bottom: 1rem;
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            position: relative;
         }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
+        .user-message {
+            background-color: var(--secondary-color);
+            margin-left: auto;
+            border: 1px solid var(--primary-color);
         }
 
-        textarea, input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            resize: vertical;
+        .ai-message {
+            background-color: rgba(0, 255, 0, 0.1);
+            margin-right: auto;
+            border: 1px solid var(--primary-color);
         }
 
-        textarea {
-            min-height: 100px;
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--glow-color);
         }
 
         button {
-            background-color: #007AFF;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1rem;
+            padding: 10px 20px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            width: 100%;
+            font-size: 1em;
+            transition: all 0.3s ease;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            box-shadow: 0 0 15px var(--glow-color);
         }
 
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .response {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            white-space: pre-wrap;
-            min-height: 100px;
-        }
-
-        .error {
-            color: #dc3545;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .loading {
+        .typing-indicator {
             display: none;
-            text-align: center;
-            margin-top: 1rem;
-            color: #666;
+            color: var(--primary-color);
+            font-style: italic;
+            margin: 10px 0;
         }
 
-        .loading.active {
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--glow-color);
+            }
+            to {
+                text-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
+            }
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            opacity: 0.3;
+            animation: scan 2s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+            }
+            100% {
+                top: 100%;
+            }
+        }
+
+        .status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8em;
+            color: var(--primary-color);
+        }
+
+        .status::before {
+            content: '●';
+            margin-right: 5px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .api-key-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-bottom: 1px solid var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .api-key-container input {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 3px;
+            width: 300px;
+        }
+
+        .api-key-container button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            color: #ff0000;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ff0000;
+            border-radius: 5px;
+            background-color: rgba(255, 0, 0, 0.1);
+            display: none;
+        }
+
+        .error-message.visible {
             display: block;
         }
     </style>
 </head>
 <body>
+    <div class="scan-line"></div>
+    <div class="api-key-container">
+        <input type="password" id="apiKeyInput" placeholder="Enter your OpenAI API key">
+        <button onclick="saveApiKey()">Save API Key</button>
+    </div>
     <div class="container">
-        <div class="chat-container">
-            <div class="input-group">
-                <label for="developer-message">Developer Message:</label>
-                <textarea id="developer-message" placeholder="Enter the developer's message here..."></textarea>
-            </div>
-            
-            <div class="input-group">
-                <label for="user-message">User Message:</label>
-                <textarea id="user-message" placeholder="Enter the user's message here..."></textarea>
-            </div>
-
-            <div class="input-group">
-                <label for="api-key">OpenAI API Key:</label>
-                <input type="password" id="api-key" placeholder="Enter your OpenAI API key">
-            </div>
-
-            <button id="send-button">Send Message</button>
-            <div class="loading" id="loading">Processing...</div>
-            <div class="error" id="error"></div>
+        <div class="header">
+            <h1>SKYNET CHAT</h1>
+            <p>AI Communication Interface v1.0</p>
+            <div class="status">SYSTEM ACTIVE</div>
         </div>
-
-        <div class="chat-container">
-            <h3>Response:</h3>
-            <div class="response" id="response"></div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="chat-container" id="chatContainer"></div>
+        <div class="typing-indicator" id="typingIndicator">AI is processing...</div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Enter your message..." autocomplete="off">
+            <button onclick="sendMessage()">SEND</button>
         </div>
     </div>
 
     <script>
-        const developerMessage = document.getElementById('developer-message');
-        const userMessage = document.getElementById('user-message');
-        const apiKey = document.getElementById('api-key');
-        const sendButton = document.getElementById('send-button');
-        const response = document.getElementById('response');
-        const error = document.getElementById('error');
-        const loading = document.getElementById('loading');
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const errorMessage = document.getElementById('errorMessage');
 
-        sendButton.addEventListener('click', async () => {
-            // Reset UI
-            error.textContent = '';
-            response.textContent = '';
-            loading.classList.add('active');
-            sendButton.disabled = true;
+        // Load API key from localStorage if available
+        window.onload = function() {
+            const savedApiKey = localStorage.getItem('openai_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+        }
+
+        function saveApiKey() {
+            const apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('openai_api_key', apiKey);
+                showError('API key saved successfully!', false);
+            } else {
+                showError('Please enter a valid API key', true);
+            }
+        }
+
+        function showError(message, isError = true) {
+            errorMessage.textContent = message;
+            errorMessage.style.color = isError ? '#ff0000' : '#00ff00';
+            errorMessage.style.borderColor = isError ? '#ff0000' : '#00ff00';
+            errorMessage.style.backgroundColor = isError ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 255, 0, 0.1)';
+            errorMessage.classList.add('visible');
+            setTimeout(() => {
+                errorMessage.classList.remove('visible');
+            }, 3000);
+        }
+
+        // Add event listener for Enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            const apiKey = localStorage.getItem('openai_api_key');
+            if (!apiKey) {
+                showError('Please enter your OpenAI API key first', true);
+                return;
+            }
+
+            // Add user message to chat
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
 
             try {
+                // Use the FastAPI backend URL
                 const response = await fetch('http://localhost:8000/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        developer_message: developerMessage.value,
-                        user_message: userMessage.value,
-                        api_key: apiKey.value,
-                        model: 'gpt-4.1-mini'
+                        developer_message: "You are a helpful AI assistant.",
+                        user_message: message,
+                        api_key: apiKey
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Network response was not ok');
                 }
 
                 const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+                let aiResponse = '';
+                let aiMessageElement = null;
 
                 while (true) {
-                    const { value, done } = await reader.read();
+                    const {done, value} = await reader.read();
                     if (done) break;
                     
-                    const text = decoder.decode(value);
-                    document.getElementById('response').textContent += text;
+                    const text = new TextDecoder().decode(value);
+                    aiResponse += text;
+                    
+                    // If this is the first chunk, create a new message element
+                    if (!aiMessageElement) {
+                        aiMessageElement = document.createElement('div');
+                        aiMessageElement.className = 'message ai-message';
+                        chatContainer.appendChild(aiMessageElement);
+                    }
+                    
+                    // Update the message content
+                    aiMessageElement.textContent = aiResponse;
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
-            } catch (e) {
-                error.textContent = `Error: ${e.message}`;
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Error: ${error.message}`, true);
             } finally {
-                loading.classList.remove('active');
-                sendButton.disabled = false;
+                typingIndicator.style.display = 'none';
             }
-        });
+        }
+
+        // Add initial system message
+        addMessage('SKYNET CHAT SYSTEM INITIALIZED. Please enter your OpenAI API key to begin.', false);
     </script>
 </body>
 </html> 
